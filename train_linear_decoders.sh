@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
+# Propagate or generate RUN_ID
+export RUN_ID=${RUN_ID:-$(date +%Y%m%d_%H%M%S)}
+
 pipelines/preprocess_fmri.sh
 pipelines/extract_clip_embeddings.sh
 pipelines/split_data.sh

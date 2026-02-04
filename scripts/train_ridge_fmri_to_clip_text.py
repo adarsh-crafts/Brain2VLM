@@ -10,6 +10,8 @@ Usage:
 
 import numpy as np
 import json
+import os
+from datetime import datetime
 from pathlib import Path
 from sklearn.linear_model import Ridge
 from sklearn.preprocessing import normalize
@@ -61,12 +63,20 @@ def main():
     print("Training fMRI → CLIP text decoder")
     
     # Define paths
-    betas_path = Path("data/processed/fmri/subj01_image_level_betas.npy")
-    clip_text_path = Path("data/processed/clip/subj01_text_embeddings.npy")
-    splits_path = Path("data/processed/splits/subj01_image_splits.npz")
-    model_path = Path("models/linear_decoders/subj01_fmri_to_clip_text.pkl")
-    norm_stats_path = Path("models/linear_decoders/subj01_fmri_norm_stats_text.npz")
-    results_path = Path("results/linear_decoders/subj01_clip_text_metrics.json")
+    subject = "subj01"
+    betas_path = Path(f"data/processed/fmri/{subject}_image_level_betas.npy")
+    clip_text_path = Path(f"data/processed/clip/{subject}_text_embeddings.npy")
+    splits_path = Path(f"data/processed/splits/{subject}_image_splits.npz")
+    
+    # Shared run_id mechanism: use RUN_ID env var or generate new one
+    run_id = os.environ.get("RUN_ID") or datetime.now().strftime("%Y%m%d_%H%M%S")
+    output_dir = Path("results/linear_decoders") / subject / f"run_{run_id}"
+    models_dir = output_dir / "models"
+    results_path = output_dir / "results.json"
+    
+    # Old paths kept for reference (not used for saving)
+    model_path = models_dir / "fmri_to_clip_text.pkl"
+    norm_stats_path = models_dir / "fmri_norm_stats_text.npz"
     
     # Check that input files exist
     for path in [betas_path, clip_text_path, splits_path]:
@@ -190,9 +200,8 @@ def main():
     print(f"Retrieval@10: {r10:.6f}")
     
     # Create output directories if they don't exist
-    model_path.parent.mkdir(parents=True, exist_ok=True)
-    norm_stats_path.parent.mkdir(parents=True, exist_ok=True)
-    results_path.parent.mkdir(parents=True, exist_ok=True)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    models_dir.mkdir(parents=True, exist_ok=True)
     
     # Save model
     print(f"\nSaving model to {model_path}...")
@@ -215,9 +224,19 @@ def main():
         "n_train": int(len(train_idx)),
         "n_test": int(len(test_idx)),
     }
+
+    # Load existing results.json if present, otherwise create new
+    if results_path.exists():
+        with open(results_path, "r") as f:
+            results = json.load(f)
+    else:
+        results = {}
     
+    # Add or update text metrics
+    results["text"] = metrics
+
     with open(results_path, "w") as f:
-        json.dump(metrics, f, indent=2)
+        json.dump(results, f, indent=2)
     
     print("\nDone!")
 
