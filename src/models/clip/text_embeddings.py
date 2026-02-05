@@ -13,7 +13,7 @@ import numpy as np
 import torch
 from tqdm import tqdm
 
-from models.clip.encoder import CLIPEmbedder
+from src.models.clip.encoder import CLIPEmbedder
 
 
 def parse_args():
@@ -170,9 +170,10 @@ def extract_text_embeddings(
 	print(f"Total captions: {total_captions}")
 	print(f"Output path: {output_hdf5}")
 
-	model_name = "openai/clip-vit-base-patch32"
+	model_name = "openai/clip-vit-large-patch14"
 	embedder = CLIPEmbedder(model_name=model_name, fp16=fp16)
 	embedding_dim = embedder.model.config.projection_dim
+	assert embedding_dim == 768
 
 	mode = "a" if Path(output_hdf5).exists() else "w"
 	initialize_output_hdf5(
@@ -200,6 +201,7 @@ def extract_text_embeddings(
 			batch_image_ids = image_ids[batch_start:batch_end]
 
 			embeddings = embedder.encode_texts(batch_captions, batch_size=len(batch_captions))
+			assert embeddings.shape[1] == 768
 
 			embeddings_ds[batch_start:batch_end] = embeddings.astype(np.float32)
 			caption_ids_ds[batch_start:batch_end] = np.asarray(batch_caption_ids, dtype=np.int64)

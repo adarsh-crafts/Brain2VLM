@@ -13,8 +13,8 @@ import gc
 from pathlib import Path
 from tqdm import tqdm
 
-from models.clip.encoder import CLIPEmbedder
-from data.stimuli_loader import load_images
+from src.models.clip.encoder import CLIPEmbedder
+from src.data.stimuli_loader import load_images
 
 
 def parse_args():
@@ -101,9 +101,10 @@ def extract_embeddings(input_hdf5: str, output_hdf5: str, batch_size: int = 32,
     print(f"Total images: {total_images}")
     
     # Initialize CLIP embedder
-    model_name = "openai/clip-vit-base-patch32"
+    model_name = "openai/clip-vit-large-patch14"
     embedder = CLIPEmbedder(model_name=model_name, fp16=fp16)
     embedding_dim = embedder.model.config.projection_dim
+    assert embedding_dim == 768
     
     # Check if output file exists and has partial embeddings
     output_path = Path(output_hdf5)
@@ -132,6 +133,7 @@ def extract_embeddings(input_hdf5: str, output_hdf5: str, batch_size: int = 32,
             
             # Extract embeddings
             embeddings = embedder.encode_images(images, batch_size=len(images))
+            assert embeddings.shape[1] == 768
             
             # Write to output file
             embeddings_dataset[batch_start:batch_end] = embeddings.astype(np.float32)

@@ -24,8 +24,8 @@ python scripts/extract_fmri_betas.py
 echo ""
 echo "[2/3] Extracting CLIP image embeddings..."
 
-python src/models/clip/image_embeddings.py \
-    --input_hdf5 data/nsddata/stimuli/nsd_stimuli.hdf5 \
+python -m src.models.clip.image_embeddings \
+    --input_hdf5 data/nsddata/stimuli/nsd/nsd_stimuli.hdf5 \
     --output_hdf5 data/embeddings/clip/clip_img_embeddings.hdf5 \
     --batch_size 64
 
@@ -37,11 +37,15 @@ python src/models/clip/image_embeddings.py \
 echo ""
 echo "[3/3] Extracting CLIP text embeddings..."
 
-python src/models/clip/text_embeddings.py \
-    --annotations_dir data/coco_annotations \
-    --output_train data/embeddings/clip/clip_captions_train2017_embeddings.hdf5 \
-    --output_val data/embeddings/clip/clip_captions_val2017_embeddings.hdf5 \
-    --batch_size 128
+python -m src.models.clip.text_embeddings \
+  --captions_json data/coco_annotations/captions_train2017.json \
+  --output_hdf5 data/embeddings/clip/clip_captions_train2017_embeddings.hdf5 \
+  --batch_size 128
+
+python -m src.models.clip.text_embeddings \
+  --captions_json data/coco_annotations/captions_val2017.json \
+  --output_hdf5 data/embeddings/clip/clip_captions_val2017_embeddings.hdf5 \
+  --batch_size 128
 
 
 echo ""

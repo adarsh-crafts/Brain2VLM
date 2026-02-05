@@ -30,6 +30,7 @@ def main():
     
     with h5py.File(train_h5_path, "r") as f:
         text_emb = f["text_embeddings"][:]
+        assert text_emb.shape[1] == 768
         img_ids = f["image_ids"][:]
         print(f"Train captions: {len(text_emb)}")
         
@@ -39,6 +40,7 @@ def main():
     print("Loading caption embeddings from val2017...")
     with h5py.File(val_h5_path, "r") as f:
         text_emb = f["text_embeddings"][:]
+        assert text_emb.shape[1] == 768
         img_ids = f["image_ids"][:]
         print(f"Val captions: {len(text_emb)}")
         
@@ -59,7 +61,7 @@ def main():
         if img_id_int not in caption_map:
             missing_images.append(img_id_int)
             # Use zero vector for missing images
-            text_embeddings.append(np.zeros(512, dtype=np.float32))
+            text_embeddings.append(np.zeros(768, dtype=np.float32))
             caption_counts.append(0)
         else:
             captions = caption_map[img_id_int]
@@ -70,6 +72,7 @@ def main():
     
     # Convert to array
     text_embeddings = np.array(text_embeddings, dtype=np.float32)
+    assert text_embeddings.shape[1] == 768
     caption_counts = np.array(caption_counts)
     
     # Check for missing images

@@ -108,6 +108,8 @@ def main(subject="subj01"):
     print("\nGenerating predictions...")
     Y_image_pred = ridge_image.predict(X_image_z)
     Y_text_pred = ridge_text.predict(X_text_z)
+    assert Y_image_pred.shape[1] == 768
+    assert Y_text_pred.shape[1] == 768
     
     print(f"Raw image predictions shape: {Y_image_pred.shape}")
     print(f"Raw text predictions shape: {Y_text_pred.shape}")
@@ -116,11 +118,15 @@ def main(subject="subj01"):
     print("\nNormalizing embeddings to unit norm...")
     Y_image_pred_norm = normalize(Y_image_pred, norm='l2')
     Y_text_pred_norm = normalize(Y_text_pred, norm='l2')
+    assert Y_image_pred_norm.shape[1] == 768
+    assert Y_text_pred_norm.shape[1] == 768
     
     # Lightweight diagnostics
     print("\n=== Diagnostics ===")
     print(f"Predicted image embeddings shape: {Y_image_pred_norm.shape}")
     print(f"Predicted text embeddings shape: {Y_text_pred_norm.shape}")
+    print("Embedding dim:", Y_image_pred_norm.shape[1])
+    print("Embedding dim:", Y_text_pred_norm.shape[1])
     
     # Mean L2 norm before normalization
     image_l2_norm_mean = np.mean(np.linalg.norm(Y_image_pred, axis=1))

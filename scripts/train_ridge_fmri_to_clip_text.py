@@ -87,6 +87,7 @@ def main():
     print("Loading data...")
     X = np.load(betas_path)
     Y = np.load(clip_text_path)
+    assert Y.shape[1] == 768
     splits = np.load(splits_path)
     train_idx = splits["train_idx"]
     test_idx = splits["test_idx"]

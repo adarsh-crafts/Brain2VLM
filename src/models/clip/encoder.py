@@ -15,7 +15,7 @@ from typing import List, Union
 class CLIPEmbedder:
     """CLIP embedding extractor for images and texts."""
 
-    def __init__(self, model_name: str = "openai/clip-vit-base-patch32", fp16: bool = False):
+    def __init__(self, model_name: str = "openai/clip-vit-large-patch14", fp16: bool = False):
         self.model_name = model_name
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -48,6 +48,7 @@ class CLIPEmbedder:
                 inputs = {k: v.to(self.device) for k, v in inputs.items()}
 
                 features = self.model.get_image_features(**inputs)
+                assert features.shape[-1] == 768
                 embeddings.append(features.cpu().numpy())
 
         return np.concatenate(embeddings, axis=0)
@@ -73,13 +74,14 @@ class CLIPEmbedder:
                 inputs = {k: v.to(self.device) for k, v in inputs.items()}
 
                 features = self.model.get_text_features(**inputs)
+                assert features.shape[-1] == 768
                 embeddings.append(features.cpu().numpy())
 
         return np.concatenate(embeddings, axis=0)
 
 
 def get_clip_embedding(image: Union[str, np.ndarray],
-                      model_name: str = "openai/clip-vit-base-patch32") -> np.ndarray:
+                      model_name: str = "openai/clip-vit-large-patch14") -> np.ndarray:
     """Legacy function for single image embedding extraction."""
     embedder = CLIPEmbedder(model_name)
 

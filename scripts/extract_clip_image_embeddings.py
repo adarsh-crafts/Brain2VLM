@@ -25,6 +25,7 @@ def main():
     print("Opening HDF5...")
     with h5py.File(embeddings_h5_path, "r") as f:
         emb = f["image_embeddings"]
+        assert emb.shape[1] == 768
         print("HDF5 shape:", emb.shape)
 
         print("Indexing embeddings...")
@@ -38,6 +39,7 @@ def main():
         subj_embeddings = sorted_embeddings[inv_order]
 
     subj_embeddings = subj_embeddings.astype(np.float32)
+    assert subj_embeddings.shape[1] == 768
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     np.save(output_path, subj_embeddings)
