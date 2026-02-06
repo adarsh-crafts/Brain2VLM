@@ -1,8 +1,8 @@
 # Custom ignore
 .scratch/
 .venv/
-/data/
-results/
+data/
+decoded/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
