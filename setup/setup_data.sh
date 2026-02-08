@@ -1,0 +1,1 @@
+python setup/build_clip_targets.py
