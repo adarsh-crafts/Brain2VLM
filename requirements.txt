@@ -49,7 +49,7 @@ jupyter_client==8.8.0
 jupyter_core==5.9.1
 kiwisolver==1.4.9
 kornia==0.6.7
--e git+https://github.com/adarsh-crafts/StableDiffusionReconstruction.git@aec0fa4a548ac02bcbc456fb8415fbbd135db620#egg=latent_diffusion&subdirectory=codes/diffusion_sd1/stable-diffusion
+-e git+https://github.com/adarsh-crafts/StableDiffusionReconstruction.git@49ec45216242dd44ab72ecc3d312d26941a5d501#egg=latent_diffusion&subdirectory=codes/diffusion_sd1/stable-diffusion
 lightning-utilities==0.15.2
 Markdown==3.10.2
 markdown-it-py==4.0.0
@@ -109,6 +109,7 @@ rich==14.3.2
 safetensors==0.7.0
 scikit-learn==1.7.2
 scipy==1.15.3
+setuptools-scm==9.2.2
 shellingham==1.5.4
 six==1.17.0
 stack-data==0.6.3
