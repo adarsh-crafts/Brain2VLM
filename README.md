@@ -41,7 +41,9 @@ Our codebase builds on these repositories. We would like to thank the authors.
 
 > https://github.com/CompVis/stable-diffusion
 
-> https://github.com/gallantlab/himalaya
+> https://github.com/openai/CLIP
+
+> https://github.com/CompVis/taming-transformers
 
 > https://github.com/tknapen/nsd_access
 
