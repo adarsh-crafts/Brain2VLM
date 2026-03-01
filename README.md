@@ -1,3 +1,4 @@
+[![Python](https://img.shields.io/badge/Python-3.11.14-blue)](https://www.python.org/)
 
 # Startup
 1. Setup the env and data files.  

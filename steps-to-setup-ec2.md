@@ -8,29 +8,35 @@ sudo dnf install -y \
   ncurses-devel gdbm-devel
 
 curl https://pyenv.run | bash
+```
 
+```
 cat > ~/.bash_profile << 'EOF'
 export PYENV_ROOT="$HOME/.pyenv"
-export PATH="$PYENV_ROOT/bin:$PATH"
+[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init --path)"
 
 if [ -f ~/.bashrc ]; then
     . ~/.bashrc
 fi
 EOF
+```
 
+```
 cat > ~/.bashrc << 'EOF'
 # Load system defaults
 if [ -f /etc/bashrc ]; then
     . /etc/bashrc
 fi
 
-# Initialize pyenv for interactive shells
-if command -v pyenv 1>/dev/null 2>&1; then
-    eval "$(pyenv init -)"
-fi
-EOF
+export PYENV_ROOT="$HOME/.pyenv"
+[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
 
+eval "$(pyenv init - bash)"
+eval "$(pyenv virtualenv-init -)"
+EOF
+```
+```
 pyenv --version
 ```
 
@@ -57,8 +63,6 @@ python -m venv .venv
 source .venv/bin/activate
 
 pip install "pip<24.1"
-pip install "setuptools<70"
-pip install wheel setuptools_scm
 
 pip install -r requirements.txt --no-build-isolation
 ```

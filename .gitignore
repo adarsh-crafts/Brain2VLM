@@ -1,11 +1,9 @@
-# Project Specific
+# Brain2VLM Project Specific
 HF_TOKEN.txt
 codes/diffusion_sd1/stable-diffusion/models/ldm/stable-diffusion-v1
 .scratch/
 nsd
 *.log
-codes/diffusion_sd2/stablediffusion/midas_models/
-codes/diffusion_sd2/stablediffusion/models/
 
 # Takagi et al. Project specific
 decoded/**
