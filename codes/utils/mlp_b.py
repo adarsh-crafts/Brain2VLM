@@ -42,14 +42,14 @@ class MLPDecoder(nn.Module):
     def __init__(self, in_dim, out_dim, dropout=0.2):
         super().__init__()
         self.input = nn.Sequential(
-            nn.Linear(in_dim, 2048),
+            nn.Linear(in_dim, 4096),
             nn.GELU(),
-            nn.LayerNorm(2048),
+            nn.LayerNorm(4096),
             nn.Dropout(dropout),
         )
-        self.res1 = ResidualBlock(2048, dropout)
-        self.res2 = ResidualBlock(2048, dropout)
-        self.output = nn.Linear(2048, out_dim)
+        self.res1 = ResidualBlock(4096, dropout)
+        self.res2 = ResidualBlock(4096, dropout)
+        self.output = nn.Linear(4096, out_dim)
 
     def forward(self, x):
         x = self.input(x)

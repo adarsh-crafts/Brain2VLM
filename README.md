@@ -20,11 +20,29 @@ python make_subjstim_copy.py --featname init_latent --use_stim each --subject su
 python make_subjstim_copy.py --featname init_latent --use_stim ave --subject subj01
 python make_subjstim_copy.py --featname c --use_stim each --subject subj01
 python make_subjstim_copy.py --featname c --use_stim ave --subject subj01
+
 python ridge_copy.py --target c --roi ventral --subject subj01
 python ridge_copy.py --target init_latent --roi early --subject subj01
 
+python mlp.py --target c --roi ventral --subject subj01
+python mlp.py --target init_latent --roi early --subject subj01
+
+python mlp_b.py --target c --roi ventral --subject subj01
+python mlp_b.py --target init_latent --roi early --subject subj01
+
 cd codes/diffusion_sd1/
-python diffusion_decoding_copy.py --imgidx 0 --gpu 0 --subject subj01 --method cvpr
+python diffusion_decoding_copy.py --imgidx 0 --gpu 0 --subject subj01 --method cvpr/mlp
+```
+
+```
+for i in $(seq 0 981)
+do
+  python diffusion_decoding_copy.py \
+      --imgidx $i \
+      --gpu 0 \
+      --subject subj01 \
+      --method cvpr
+done
 ```
 
 # Evaluation
