@@ -49,7 +49,15 @@ done
 ```
 cd codes/utils/
 python img2feat_decoded_copy.py --gpu 0 --subject subj01 --method cvpr
+python img2feat_decoded_copy.py --gpu 0 --subject subj01 --method mlp
+
 python identification.py --usefeat inception --subject subj01 --method cvpr
+python identification.py --usefeat inception --subject subj01 --method mlp
+```
+
+To calculate all scores in one go:
+```
+python aggr_identification_scores
 ```
 
 # Acknowledgement

@@ -31,7 +31,7 @@ def main():
         "--method",
         required=True,
         type=str,
-        help="cvpr or text or gan or depth",
+        help="cvpr or text or gan or depth or mlp",
     )
 
     # Parameters
