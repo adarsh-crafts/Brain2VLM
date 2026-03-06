@@ -27,22 +27,8 @@ python ridge_copy.py --target init_latent --roi early --subject subj01
 python mlp.py --target c --roi ventral --subject subj01
 python mlp.py --target init_latent --roi early --subject subj01
 
-python mlp_b.py --target c --roi ventral --subject subj01
-python mlp_b.py --target init_latent --roi early --subject subj01
-
 cd codes/diffusion_sd1/
 python diffusion_decoding_copy.py --imgidx 0 --gpu 0 --subject subj01 --method cvpr/mlp
-```
-
-```
-for i in $(seq 0 981)
-do
-  python diffusion_decoding_copy.py \
-      --imgidx $i \
-      --gpu 0 \
-      --subject subj01 \
-      --method cvpr
-done
 ```
 
 # Evaluation
@@ -58,6 +44,122 @@ python identification.py --usefeat inception --subject subj01 --method mlp
 To calculate all scores in one go:
 ```
 python aggr_identification_scores
+```
+
+```
+python retrieval.py --pred_file ../../decoded/subj01/subj01_ventral_scores_init_latent.npy
+python retrieval.py --pred_file ../../decoded/subj01/subj01_early_scores_init_latent_mlp.npy
+```
+
+# Ablation Studies
+## 1. Baseline (Main Model)
+```
+for s in 0 1 2
+do
+python mlp_ablations.py \
+--subject subj01 \
+--roi early lateral ventral \
+--target init_latent \
+--depth 2 \
+--hidden_dim 2048 \
+--data_frac 1.0 \
+--seed $s
+done
+```
+
+## 2. Depth Ablation (Nonlinearity Study)
+```
+DEPTHS=(0 1 2 4 6)
+
+for d in "${DEPTHS[@]}"
+do
+for s in 0 1 2
+do
+python mlp_ablations.py \
+--subject subj01 \
+--roi early lateral ventral \
+--target init_latent \
+--depth $d \
+--hidden_dim 2048 \
+--data_frac 1.0 \
+--seed $s
+done
+done
+```
+
+## 3. Width Ablation (Capacity Study)
+```
+WIDTHS=(512 1024 2048 4096)
+
+for w in "${WIDTHS[@]}"
+do
+for s in 0 1 2
+do
+python mlp_ablations.py \
+--subject subj01 \
+--roi early lateral ventral \
+--target init_latent \
+--depth 2 \
+--hidden_dim $w \
+--data_frac 1.0 \
+--seed $s
+done
+done
+```
+
+## 4. Data Efficiency Study
+```
+FRACS=(0.1 0.25 0.5 0.75 1.0)
+
+for f in "${FRACS[@]}"
+do
+for s in 0 1 2
+do
+python mlp_ablations.py \
+--subject subj01 \
+--roi early lateral ventral \
+--target init_latent \
+--depth 2 \
+--hidden_dim 2048 \
+--data_frac $f \
+--seed $s
+done
+done
+```
+
+## 5. ROI Contribution Study
+```
+ROIS=(early lateral ventral)
+
+for r in "${ROIS[@]}"
+do
+for s in 0 1 2
+do
+python mlp_ablations.py \
+--subject subj01 \
+--roi $r \
+--target init_latent \
+--depth 2 \
+--hidden_dim 2048 \
+--data_frac 1.0 \
+--seed $s
+done
+done
+```
+
+## Target Space Comparison (Strong Experiment)
+```
+for s in 0 1 2
+do
+python mlp_ablations.py \
+--subject subj01 \
+--roi early lateral ventral \
+--target c \
+--depth 2 \
+--hidden_dim 2048 \
+--data_frac 1.0 \
+--seed $s
+done
 ```
 
 # Acknowledgement
