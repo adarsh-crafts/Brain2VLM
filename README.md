@@ -51,8 +51,25 @@ python retrieval.py --pred_file ../../decoded/subj01/subj01_ventral_scores_init_
 python retrieval.py --pred_file ../../decoded/subj01/subj01_early_scores_init_latent_mlp.npy
 ```
 
+# Acknowledgement
+Our codebase builds on these repositories. We would like to thank the authors. 
+
+> https://github.com/yu-takagi/StableDiffusionReconstruction
+
+> https://github.com/CompVis/stable-diffusion
+
+> https://github.com/openai/CLIP
+
+> https://github.com/CompVis/taming-transformers
+
+> https://github.com/tknapen/nsd_access
+
+> https://github.com/KamitaniLab/brain-decoding-cookbook-public
+
+---
+
 # Ablation Studies
-## 1. Baseline (Main Model)
+### 1. Baseline (Main Model)
 ```
 for s in 0 1 2
 do
@@ -67,7 +84,7 @@ python mlp_ablations.py \
 done
 ```
 
-## 2. Depth Ablation (Nonlinearity Study)
+### 2. Depth Ablation (Nonlinearity Study)
 ```
 DEPTHS=(0 1 2 4 6)
 
@@ -87,7 +104,7 @@ done
 done
 ```
 
-## 3. Width Ablation (Capacity Study)
+### 3. Width Ablation (Capacity Study)
 ```
 WIDTHS=(512 1024 2048 4096)
 
@@ -107,7 +124,7 @@ done
 done
 ```
 
-## 4. Data Efficiency Study
+### 4. Data Efficiency Study
 ```
 FRACS=(0.1 0.25 0.5 0.75 1.0)
 
@@ -127,7 +144,7 @@ done
 done
 ```
 
-## 5. ROI Contribution Study
+### 5. ROI Contribution Study
 ```
 ROIS=(early lateral ventral)
 
@@ -147,32 +164,55 @@ done
 done
 ```
 
-## Target Space Comparison (Strong Experiment)
+## ROI wise comparision
 ```
-for s in 0 1 2
-do
-python mlp_ablations.py \
---subject subj01 \
---roi early lateral ventral \
---target c \
---depth 2 \
---hidden_dim 2048 \
---data_frac 1.0 \
---seed $s
-done
+python mlp_roi.py --subject subj01 --roi early --target init_latent
+python mlp_roi.py --subject subj01 --roi midventral --target init_latent
+python mlp_roi.py --subject subj01 --roi midlateral --target init_latent
+python mlp_roi.py --subject subj01 --roi ventral --target init_latent
+
+python diffusion_decoding_copy.py --gpu 0 --subject subj01 --method early
+python diffusion_decoding_copy.py --gpu 0 --subject subj01 --method midventral
+python diffusion_decoding_copy.py --gpu 0 --subject subj01 --method midlateral
+python diffusion_decoding_copy.py --gpu 0 --subject subj01 --method ventral
+
+python img2feat_decoded_copy.py --gpu 0 --subject subj01 --method early
+python img2feat_decoded_copy.py --gpu 0 --subject subj01 --method midventral
+python img2feat_decoded_copy.py --gpu 0 --subject subj01 --method midlateral
+python img2feat_decoded_copy.py --gpu 0 --subject subj01 --method ventral
 ```
 
-# Acknowledgement
-Our codebase builds on these repositories. We would like to thank the authors. 
+## Reconstruction
+depth
+```
+cd codes/diffusion_sd1
+for i in 0 240 480 720; do python diffusion_decoding_ablated.py --imgidx $i --gpu 0 --subject subj01 --method mlp_seed0_d0_w2048_frac1.0; done
+for i in 0 240 480 720; do python diffusion_decoding_ablated.py --imgidx $i --gpu 0 --subject subj01 --method mlp_seed0_d1_w2048_frac1.0; done
+for i in 0 240 480 720; do python diffusion_decoding_ablated.py --imgidx $i --gpu 0 --subject subj01 --method mlp_seed0_d2_w2048_frac1.0; done
+for i in 0 240 480 720; do python diffusion_decoding_ablated.py --imgidx $i --gpu 0 --subject subj01 --method mlp_seed0_d4_w2048_frac1.0; done
+for i in 0 240 480 720; do python diffusion_decoding_ablated.py --imgidx $i --gpu 0 --subject subj01 --method mlp_seed0_d6_w2048_frac1.0; done
+```
 
-> https://github.com/yu-takagi/StableDiffusionReconstruction
+width
+```
+for i in 0 240 480 720; do python diffusion_decoding_ablated.py --imgidx $i --gpu 0 --subject subj01 --method mlp_seed0_d2_w512_frac1.0; done
+for i in 0 240 480 720; do python diffusion_decoding_ablated.py --imgidx $i --gpu 0 --subject subj01 --method mlp_seed0_d2_w1024_frac1.0; done
+for i in 0 240 480 720; do python diffusion_decoding_ablated.py --imgidx $i --gpu 0 --subject subj01 --method mlp_seed0_d2_w2048_frac1.0; done
+for i in 0 240 480 720; do python diffusion_decoding_ablated.py --imgidx $i --gpu 0 --subject subj01 --method mlp_seed0_d2_w4096_frac1.0; done
+```
 
-> https://github.com/CompVis/stable-diffusion
+data eff
+```
+for i in 0 240 480 720; do python diffusion_decoding_ablated.py --imgidx $i --gpu 0 --subject subj01 --method mlp_seed0_d2_w2048_frac0.1; done
+for i in 0 240 480 720; do python diffusion_decoding_ablated.py --imgidx $i --gpu 0 --subject subj01 --method mlp_seed0_d2_w2048_frac0.25; done
+for i in 0 240 480 720; do python diffusion_decoding_ablated.py --imgidx $i --gpu 0 --subject subj01 --method mlp_seed0_d2_w2048_frac0.5; done
+for i in 0 240 480 720; do python diffusion_decoding_ablated.py --imgidx $i --gpu 0 --subject subj01 --method mlp_seed0_d2_w2048_frac0.75; done
+for i in 0 240 480 720; do python diffusion_decoding_ablated.py --imgidx $i --gpu 0 --subject subj01 --method mlp_seed0_d2_w2048_frac1.0; done
+```
 
-> https://github.com/openai/CLIP
-
-> https://github.com/CompVis/taming-transformers
-
-> https://github.com/tknapen/nsd_access
-
-> https://github.com/KamitaniLab/brain-decoding-cookbook-public
+roi
+```
+for i in 0 240 480 720; do python diffusion_decoding_roi.py --imgidx $i --gpu 0 --subject subj01 --roi early --method mlp_seed0_d2_w2048_frac1.0; done
+for i in 0 240 480 720; do python diffusion_decoding_roi.py --imgidx $i --gpu 0 --subject subj01 --roi lateral --method mlp_seed0_d2_w2048_frac1.0; done
+for i in 0 240 480 720; do python diffusion_decoding_roi.py --imgidx $i --gpu 0 --subject subj01 --roi ventral --method mlp_seed0_d2_w2048_frac1.0; done
+```

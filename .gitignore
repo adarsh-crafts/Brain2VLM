@@ -4,6 +4,7 @@ codes/diffusion_sd1/stable-diffusion/models/ldm/stable-diffusion-v1
 .scratch/
 nsd
 *.log
+slurm_outs/
 
 # Takagi et al. Project specific
 decoded/**
