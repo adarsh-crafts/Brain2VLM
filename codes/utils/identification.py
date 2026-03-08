@@ -1,93 +1,243 @@
 import argparse
 import numpy as np
+import pandas as pd
 from tqdm import tqdm
+import os
 
-def load_feat_org(imgid, subject, method, usefeat):
-    featdir = f'../../identification/{method}/{subject}/'
-    feat = np.load(f'{featdir}/{imgid:05}_org_{usefeat}.npy').flatten().squeeze()
-    return feat
 
-def load_feat_gen(imgid, subject, method, usefeat):
+# -------------------------------------------------
+# Load original features
+# -------------------------------------------------
+
+def load_org_matrix(nimage, subject, method, usefeat):
+
+    featdir = f'../../identification/{method}/{subject}'
+    feats = []
+
+    for imgid in range(nimage):
+        f = np.load(f"{featdir}/{imgid:05}_org_{usefeat}.npy").flatten()
+        feats.append(f)
+
+    return np.stack(feats)
+
+
+# -------------------------------------------------
+# Load generated features
+# -------------------------------------------------
+
+def load_gen_matrix(nimage, subject, method, usefeat):
+
     featdir = f'../../identification/{method}/{subject}'
     nrep = 5
 
-    feats_gen = []
-    for rep in range(nrep):
-        feat_gen = np.load(f'{featdir}/{imgid:05}_{rep:03}_{usefeat}.npy').flatten().squeeze()
-        feats_gen.append(feat_gen)
+    feats = []
 
-    return feats_gen
+    for imgid in range(nimage):
+
+        reps = []
+
+        for rep in range(nrep):
+            f = np.load(f"{featdir}/{imgid:05}_{rep:03}_{usefeat}.npy").flatten()
+            reps.append(f)
+
+        reps = np.mean(np.stack(reps), axis=0)
+        feats.append(reps)
+
+    return np.stack(feats)
+
+
+# -------------------------------------------------
+# Fast correlation matrix
+# -------------------------------------------------
+
+def corr_matrix(A, B):
+
+    A = A - A.mean(axis=1, keepdims=True)
+    B = B - B.mean(axis=1, keepdims=True)
+
+    A = A / np.linalg.norm(A, axis=1, keepdims=True)
+    B = B / np.linalg.norm(B, axis=1, keepdims=True)
+
+    return A @ B.T
+
+
+# -------------------------------------------------
+# Identification accuracy
+# -------------------------------------------------
+
+def identification_accuracy(R):
+
+    n = R.shape[0]
+
+    correct = 0
+    total = n * (n - 1)
+
+    diag = np.diag(R)
+
+    for i in range(n):
+
+        r_true = diag[i]
+        r_fake = np.delete(R[i], i)
+
+        correct += np.sum(r_true > r_fake)
+
+    return correct / total
+
+
+# -------------------------------------------------
+# Detect feature names automatically
+# -------------------------------------------------
+
+def detect_features(method, subject):
+
+    featdir = f'../../identification/{method}/{subject}'
+
+    features = sorted({
+        f.split("_org_")[1].replace(".npy","")
+        for f in os.listdir(featdir)
+        if "_org_" in f
+    })
+
+    return features
+
+
+# -------------------------------------------------
+# Infer model + layer metadata
+# -------------------------------------------------
+
+def infer_model_layer(featname):
+
+    model = "Unknown"
+    layer = -1
+
+    # CLIP
+    if featname.startswith("clip_h"):
+        model = "CLIP"
+        layer = int(featname.split("h")[1])
+
+    elif featname == "clip":
+        model = "CLIP"
+        layer = 25
+
+    # DINO
+    elif featname.startswith("dino_h"):
+        model = "DINOv2"
+        layer = int(featname.split("h")[1])
+
+    elif featname == "dino":
+        model = "DINOv2"
+        layer = 24
+
+    # ResNet
+    elif featname.startswith("resnet"):
+        model = "ResNet"
+
+        if "conv1" in featname:
+            layer = 0
+        elif "l1" in featname:
+            layer = 1
+        elif "l2" in featname:
+            layer = 2
+        elif "l3" in featname:
+            layer = 3
+        elif "l4" in featname:
+            layer = 4
+        elif "avgpool" in featname:
+            layer = 5
+
+    # AlexNet
+    elif featname.startswith("alex"):
+        model = "AlexNet"
+
+        if "conv1" in featname:
+            layer = 1
+        elif "conv2" in featname:
+            layer = 2
+        elif "conv3" in featname:
+            layer = 3
+        elif "conv4" in featname:
+            layer = 4
+        elif "conv5" in featname:
+            layer = 5
+        elif "fc6" in featname:
+            layer = 6
+        elif "fc7" in featname:
+            layer = 7
+        elif "fc8" in featname:
+            layer = 8
+
+    # Inception
+    elif featname.startswith("inception"):
+        model = "Inception"
+
+        if "mix5" in featname:
+            layer = 5
+        elif "mix6" in featname:
+            layer = 6
+        elif "mix7" in featname:
+            layer = 7
+        elif "avgpool" in featname:
+            layer = 8
+
+    return model, layer
+
+
+# -------------------------------------------------
+# Main
+# -------------------------------------------------
 
 def main():
+
     parser = argparse.ArgumentParser()
 
-    parser.add_argument(
-        "--usefeat",
-        required=True,
-        type=str,
-        help="feature for calculating PSM"
-    )
-    parser.add_argument(
-        "--subject",
-        type=str,
-        default=None,
-        help="subject name: subj01 or subj02  or subj05  or subj07 for full-data subjects ",
-    )
-    parser.add_argument(
-        "--method",
-        required=True,
-        type=str,
-        help="cvpr or text or gan or depth",
-    )
+    parser.add_argument("--subject", required=True)
+    parser.add_argument("--methods", nargs="+", required=True)
+    parser.add_argument("--out_csv", default="identification_results.csv")
 
     opt = parser.parse_args()
-    usefeat = opt.usefeat
+
     subject = opt.subject
-    method = opt.method
+    methods = opt.methods
     nimage = 982
 
-    # Load all images
-    print("Now Loading all images......")
-    feat_orgs = []
-    feat_gens = []
-    for imgid in tqdm(range(nimage)):
-        feat_org = load_feat_org(imgid, subject, method, usefeat)
-        feat_orgs.append(feat_org)
+    results = []
 
-        feat_gen = load_feat_gen(imgid, subject, method, usefeat)
-        feat_gens.append(feat_gen)
+    for method in methods:
 
-    # Calculate similarity
-    print("Now Calculating similarity......")
-    rs_all = []
-    for row in tqdm(range(nimage)):
-        rs_row = []
-        for col in range(nimage):
-            feat_org = feat_orgs[row]  
-            feat_gen = feat_gens[col]  
-            r = np.corrcoef(feat_org,feat_gen)[0,1:]
-            rs_row.append(r)
-        rs_all.append(rs_row)
+        print(f"\nEvaluating method: {method}")
 
-    # Calculate accuracy
-    print("Now Calculating identification accuracy......")
-    acc_all = []
-    for imgid_org in tqdm(range(nimage)):
-        # Calculate true R
-        r_true = rs_all[imgid_org][imgid_org]
+        features = detect_features(method, subject)
 
-        # Calculate Fake R
-        acc = []
-        fakeimgs = list(range(nimage))
-        fakeimgs.remove(imgid_org)
-        for imgid_fake in fakeimgs:
-            r_fake = rs_all[imgid_org][imgid_fake]
-            acc.append(r_true.mean() > r_fake.mean())
-        
-        acc_all.append(sum(acc)/len(acc))
-    acc_all = np.array(acc_all)
+        for featname in tqdm(features):
 
-    print(f'{subject}_{usefeat}:\t ACC = {np.mean(acc_all):.03} ')
+            try:
+
+                org = load_org_matrix(nimage, subject, method, featname)
+                gen = load_gen_matrix(nimage, subject, method, featname)
+
+            except FileNotFoundError:
+                continue
+
+            R = corr_matrix(org, gen)
+
+            acc = identification_accuracy(R)
+
+            model, layer = infer_model_layer(featname)
+
+            results.append({
+                "method": method,
+                "model": model,
+                "layer": layer,
+                "feature": featname,
+                "accuracy": acc
+            })
+
+    df = pd.DataFrame(results)
+
+    df.to_csv(opt.out_csv, index=False)
+
+    print("\nSaved results to:", opt.out_csv)
+
 
 if __name__ == "__main__":
     main()
