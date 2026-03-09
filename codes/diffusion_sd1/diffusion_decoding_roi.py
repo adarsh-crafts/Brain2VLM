@@ -175,8 +175,19 @@ def main():
     if is_cvpr_method(method) or is_text_method(method) or is_mlp_method(method):
         roi_latent = opt.roi
         if is_mlp_method(method):
-            scores_latent = np.load(
-                f'../../decoded/{subject}/{subject}_{roi_latent}_scores_init_latent_mlp.npy')
+            roi_file = f'../../decoded/{subject}/{subject}_{roi_latent}_scores_init_latent_{method}.npy'
+            combined_file = f'../../decoded/{subject}/{subject}_early_lateral_ventral_scores_init_latent_{method}.npy'
+            if os.path.exists(roi_file):
+                print(f"Loading per-ROI latent file: {roi_file}")
+                scores_latent = np.load(roi_file)
+            elif os.path.exists(combined_file):
+                print(f"Per-ROI file not found, falling back to combined file: {combined_file}")
+                scores_latent = np.load(combined_file)
+            else:
+                raise FileNotFoundError(
+                    f"Could not find scores_latent for roi={roi_latent}, method={method}.\n"
+                    f"Tried:\n  {roi_file}\n  {combined_file}"
+                )
         else:
             scores_latent = np.load(
                 f'../../decoded/{subject}/{subject}_{roi_latent}_scores_init_latent.npy')
