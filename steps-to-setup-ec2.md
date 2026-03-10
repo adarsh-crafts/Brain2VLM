@@ -36,6 +36,11 @@ eval "$(pyenv init - bash)"
 eval "$(pyenv virtualenv-init -)"
 EOF
 ```
+
+```
+source ~/.bash_profile
+```
+
 ```
 pyenv --version
 ```
@@ -63,6 +68,7 @@ python -m venv .venv
 source .venv/bin/activate
 
 pip install "pip<24.1"
+pip install setuptools wheel setuptools-scm packaging
 
 pip install -r requirements.txt --no-build-isolation
 ```
@@ -87,4 +93,5 @@ unzip annotations_trainval2017.zip
 cd ..
 mv annotations/annotations/*.json annotations/
 rm -r annotations/annotations
+cd ../../../..
 ```

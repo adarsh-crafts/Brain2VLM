@@ -1,3 +1,8 @@
+pip<24.1
+setuptools
+wheel
+setuptools-scm==9.2.2
+packaging==26.0
 absl-py==2.4.0
 aiohappyeyeballs==2.6.1
 aiohttp==3.13.3
@@ -80,7 +85,6 @@ nvidia-nvtx-cu12==12.8.90
 omegaconf==2.3.0
 open_clip_torch==3.2.0
 opencv-python==4.13.0.92
-packaging==26.0
 pandas==2.3.3
 parso==0.8.6
 pexpect==4.9.0
@@ -107,7 +111,6 @@ rich==14.3.2
 safetensors==0.7.0
 scikit-learn==1.7.2
 scipy==1.15.3
-setuptools-scm==9.2.2
 shellingham==1.5.4
 six==1.17.0
 stack-data==0.6.3
