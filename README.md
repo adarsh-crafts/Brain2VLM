@@ -69,150 +69,157 @@ Our codebase builds on these repositories. We would like to thank the authors.
 ---
 
 # Ablation Studies
-### 1. Baseline (Main Model)
-```
-for s in 0 1 2
-do
-python mlp_ablations.py \
---subject subj01 \
---roi early lateral ventral \
---target init_latent \
---depth 2 \
---hidden_dim 2048 \
---data_frac 1.0 \
---seed $s
-done
-```
 
-### 2. Depth Ablation (Nonlinearity Study)
+## 1. init_latent (early cortex)
+### Depth Ablation (Nonlinearity Study)
 ```
+{
 DEPTHS=(0 1 2 4 6)
 
 for d in "${DEPTHS[@]}"
 do
 for s in 0 1 2
 do
+echo "DEPTH=$d SEED=$s"
+
 python mlp_ablations.py \
 --subject subj01 \
---roi early lateral ventral \
+--roi early \
 --target init_latent \
 --depth $d \
 --hidden_dim 2048 \
 --data_frac 1.0 \
 --seed $s
+
 done
 done
+} 2>&1 | tee logs/run_latent_depth_ablation.txt
 ```
 
-### 3. Width Ablation (Capacity Study)
+### Width Ablation (Capacity Study)
 ```
+{
 WIDTHS=(512 1024 2048 4096)
 
 for w in "${WIDTHS[@]}"
 do
 for s in 0 1 2
 do
+echo "WIDTH=$w SEED=$s"
+
 python mlp_ablations.py \
 --subject subj01 \
---roi early lateral ventral \
+--roi early \
 --target init_latent \
 --depth 2 \
 --hidden_dim $w \
 --data_frac 1.0 \
 --seed $s
+
 done
 done
+} 2>&1 | tee logs/run_latent_width_ablation.txt
+
 ```
 
-### 4. Data Efficiency Study
+### Data Efficiency Study
 ```
+{
 FRACS=(0.1 0.25 0.5 0.75 1.0)
 
 for f in "${FRACS[@]}"
 do
 for s in 0 1 2
 do
+echo "FRAC=$f SEED=$s"
+
 python mlp_ablations.py \
 --subject subj01 \
---roi early lateral ventral \
+--roi early \
 --target init_latent \
 --depth 2 \
 --hidden_dim 2048 \
 --data_frac $f \
 --seed $s
+
 done
 done
+} 2>&1 | tee logs/run_latent_frac_ablation.txt
 ```
 
-### 5. ROI Contribution Study
+## 2. c (ventral cortex)
+### Depth Ablation (Nonlinearity Study)
 ```
-ROIS=(early lateral ventral)
+{
+DEPTHS=(0 1 2 4 6)
 
-for r in "${ROIS[@]}"
+for d in "${DEPTHS[@]}"
 do
 for s in 0 1 2
 do
+echo "DEPTH=$d SEED=$s"
+
 python mlp_ablations.py \
 --subject subj01 \
---roi $r \
---target init_latent \
---depth 2 \
+--roi ventral \
+--target c \
+--depth $d \
 --hidden_dim 2048 \
 --data_frac 1.0 \
 --seed $s
+
 done
 done
+} 2>&1 | tee logs/run_c_depth_ablation.txt
 ```
 
-## ROI wise comparision
+### Width Ablation (Capacity Study)
 ```
-python mlp_roi.py --subject subj01 --roi early --target init_latent
-python mlp_roi.py --subject subj01 --roi midventral --target init_latent
-python mlp_roi.py --subject subj01 --roi midlateral --target init_latent
-python mlp_roi.py --subject subj01 --roi ventral --target init_latent
+{
+WIDTHS=(512 1024 2048 4096)
 
-python diffusion_decoding_copy.py --gpu 0 --subject subj01 --method early
-python diffusion_decoding_copy.py --gpu 0 --subject subj01 --method midventral
-python diffusion_decoding_copy.py --gpu 0 --subject subj01 --method midlateral
-python diffusion_decoding_copy.py --gpu 0 --subject subj01 --method ventral
+for w in "${WIDTHS[@]}"
+do
+for s in 0 1 2
+do
+echo "WIDTH=$w SEED=$s"
 
-python img2feat_decoded_copy.py --gpu 0 --subject subj01 --method early
-python img2feat_decoded_copy.py --gpu 0 --subject subj01 --method midventral
-python img2feat_decoded_copy.py --gpu 0 --subject subj01 --method midlateral
-python img2feat_decoded_copy.py --gpu 0 --subject subj01 --method ventral
-```
+python mlp_ablations.py \
+--subject subj01 \
+--roi ventral \
+--target c \
+--depth 2 \
+--hidden_dim $w \
+--data_frac 1.0 \
+--seed $s
 
-## Reconstruction
-depth
-```
-cd codes/diffusion_sd1
-for i in 0 240 480 720; do python diffusion_decoding_ablated.py --imgidx $i --gpu 0 --subject subj01 --method mlp_seed0_d0_w2048_frac1.0; done
-for i in 0 240 480 720; do python diffusion_decoding_ablated.py --imgidx $i --gpu 0 --subject subj01 --method mlp_seed0_d1_w2048_frac1.0; done
-for i in 0 240 480 720; do python diffusion_decoding_ablated.py --imgidx $i --gpu 0 --subject subj01 --method mlp_seed0_d2_w2048_frac1.0; done
-for i in 0 240 480 720; do python diffusion_decoding_ablated.py --imgidx $i --gpu 0 --subject subj01 --method mlp_seed0_d4_w2048_frac1.0; done
-for i in 0 240 480 720; do python diffusion_decoding_ablated.py --imgidx $i --gpu 0 --subject subj01 --method mlp_seed0_d6_w2048_frac1.0; done
+done
+done
+} 2>&1 | tee logs/run_c_width_ablation.txt
+
 ```
 
-width
+### Data Efficiency Study
 ```
-for i in 0 240 480 720; do python diffusion_decoding_ablated.py --imgidx $i --gpu 0 --subject subj01 --method mlp_seed0_d2_w512_frac1.0; done
-for i in 0 240 480 720; do python diffusion_decoding_ablated.py --imgidx $i --gpu 0 --subject subj01 --method mlp_seed0_d2_w1024_frac1.0; done
-for i in 0 240 480 720; do python diffusion_decoding_ablated.py --imgidx $i --gpu 0 --subject subj01 --method mlp_seed0_d2_w2048_frac1.0; done
-for i in 0 240 480 720; do python diffusion_decoding_ablated.py --imgidx $i --gpu 0 --subject subj01 --method mlp_seed0_d2_w4096_frac1.0; done
-```
+{
+FRACS=(0.1 0.25 0.5 0.75 1.0)
 
-data eff
-```
-for i in 0 240 480 720; do python diffusion_decoding_ablated.py --imgidx $i --gpu 0 --subject subj01 --method mlp_seed0_d2_w2048_frac0.1; done
-for i in 0 240 480 720; do python diffusion_decoding_ablated.py --imgidx $i --gpu 0 --subject subj01 --method mlp_seed0_d2_w2048_frac0.25; done
-for i in 0 240 480 720; do python diffusion_decoding_ablated.py --imgidx $i --gpu 0 --subject subj01 --method mlp_seed0_d2_w2048_frac0.5; done
-for i in 0 240 480 720; do python diffusion_decoding_ablated.py --imgidx $i --gpu 0 --subject subj01 --method mlp_seed0_d2_w2048_frac0.75; done
-for i in 0 240 480 720; do python diffusion_decoding_ablated.py --imgidx $i --gpu 0 --subject subj01 --method mlp_seed0_d2_w2048_frac1.0; done
-```
+for f in "${FRACS[@]}"
+do
+for s in 0 1 2
+do
+echo "FRAC=$f SEED=$s"
 
-roi
-```
-for i in 0 240 480 720; do python diffusion_decoding_roi.py --imgidx $i --gpu 0 --subject subj01 --roi early --method mlp_seed0_d2_w2048_frac1.0; done
-for i in 0 240 480 720; do python diffusion_decoding_roi.py --imgidx $i --gpu 0 --subject subj01 --roi lateral --method mlp_seed0_d2_w2048_frac1.0; done
-for i in 0 240 480 720; do python diffusion_decoding_roi.py --imgidx $i --gpu 0 --subject subj01 --roi ventral --method mlp_seed0_d2_w2048_frac1.0; done
+python mlp_ablations.py \
+--subject subj01 \
+--roi ventral \
+--target c \
+--depth 2 \
+--hidden_dim 2048 \
+--data_frac $f \
+--seed $s
+
+done
+done
+} 2>&1 | tee logs/run_c_frac_ablation.txt
 ```

@@ -153,12 +153,13 @@ def main():
     Image.fromarray(np.squeeze(sdataset[idx73k,:,:,:]).astype(np.uint8)).save(
         os.path.join(sample_path, f"{imgidx:05}_org.png"))    
     
-    if method in ['cvpr','mlp','text']:
+    if method in ['cvpr','text'] or method.startswith('mlp'):
         roi_latent = 'early'
-        if method == 'mlp':
-            scores_latent = np.load(f'../../decoded/{subject}/{subject}_{roi_latent}_scores_init_latent_mlp.npy')
+        if method.startswith('mlp'):
+            scores_latent = np.load(f'../../decoded/{subject}/{subject}_{roi_latent}_scores_init_latent_{method}.npy')
         else:
             scores_latent = np.load(f'../../decoded/{subject}/{subject}_{roi_latent}_scores_init_latent.npy')
+        print("Loaded latent:", scores_latent.shape)
         latent = scores_latent[imgidx,:]
         latent = (latent - latent.mean()) / (latent.std() + 1e-6)
 
@@ -190,12 +191,13 @@ def main():
     init_latent = model.get_first_stage_encoding(model.encode_first_stage(init_image))  # move to latent space
 
     # Load c (Semantics)
-    if method in ['cvpr','mlp']:
+    if method == 'cvpr' or method.startswith('mlp'):
         roi_c = 'ventral'
-        if method == 'mlp':
-            scores_c = np.load(f'../../decoded/{subject}/{subject}_{roi_c}_scores_c_mlp.npy')
+        if method.startswith('mlp'):
+            scores_c = np.load(f'../../decoded/{subject}/{subject}_{roi_c}_scores_c_{method}.npy')
         else:
             scores_c = np.load(f'../../decoded/{subject}/{subject}_{roi_c}_scores_c.npy')
+        print("Loaded c:", scores_c.shape)
         carr = scores_c[imgidx,:].reshape(77,768)
         c = torch.Tensor(carr).unsqueeze(0).to('cuda')
     elif method in ['text','gan']:
