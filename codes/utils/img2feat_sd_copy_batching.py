@@ -32,14 +32,23 @@ def load_model_from_config(config, ckpt, gpu, verbose=False):
     model.eval()
     return model
 
-def load_img_from_arr(img_arr,resolution):
+def load_img_from_arr(img_arr, resolution):
     image = Image.fromarray(img_arr).convert("RGB")
-    w, h = resolution, resolution
-    image = image.resize((w, h), resample=PIL.Image.LANCZOS)
+
+    # ---- center crop (keeps aspect ratio like neuroAI papers) ----
+    min_dim = min(image.size)
+    left = (image.width - min_dim) // 2
+    top = (image.height - min_dim) // 2
+    image = image.crop((left, top, left + min_dim, top + min_dim))
+
+    # ---- resize to SD resolution ----
+    image = image.resize((resolution, resolution), resample=PIL.Image.LANCZOS)
+
     image = np.array(image).astype(np.float32) / 255.0
     image = image[None].transpose(0, 3, 1, 2)
     image = torch.from_numpy(image)
-    return 2.*image - 1.
+
+    return 2. * image - 1.
 
 def main():
 
@@ -76,7 +85,7 @@ def main():
     seed_everything(opt.seed)
     imgidx = opt.imgidx
     gpu = opt.gpu
-    resolution = 320
+    resolution = 512
     batch_size = opt.batch_size
     ddim_steps = 50
     ddim_eta = 0.0
