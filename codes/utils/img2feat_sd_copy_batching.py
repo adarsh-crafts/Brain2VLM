@@ -85,7 +85,7 @@ def main():
     seed_everything(opt.seed)
     imgidx = opt.imgidx
     gpu = opt.gpu
-    resolution = 512
+    resolution = 320
     batch_size = opt.batch_size
     ddim_steps = 50
     ddim_eta = 0.0
