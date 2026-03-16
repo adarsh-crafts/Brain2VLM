@@ -24,11 +24,23 @@ python make_subjstim_copy.py --featname c --use_stim ave --subject subj01
 python ridge_copy.py --target c --roi ventral --subject subj01
 python ridge_copy.py --target init_latent --roi early --subject subj01
 
-python mlp.py --target c --roi ventral --subject subj01
-python mlp.py --target init_latent --roi early --subject subj01
+python -u mlp.py --target c --roi ventral --subject subj01 2>&1 | tee logs/run_normal_mlp_c.txt
+python -u mlp.py --target init_latent --roi early --subject subj01 2>&1 | tee logs/run_normal_mlp_c.tx
 
 cd codes/diffusion_sd1/
 python diffusion_decoding_copy.py --imgidx 0 --gpu 0 --subject subj01 --method cvpr/mlp
+```
+or
+```
+for i in {0..981}; do
+    echo "Running imgidx $i"
+    python diffusion_decoding_copy.py --imgidx $i --gpu 0 --subject subj01 --method cvpr/mlp
+done 2>&1 | tee logs/run_recon_cvpr/mlp.txt
+```
+
+## Best MLP Config:
+```
+
 ```
 
 # Evaluation
