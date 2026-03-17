@@ -134,7 +134,7 @@ def main():
     parser.add_argument(
         "--gallery_size",
         type=int,
-        default=1000
+        default=50
     )
 
     parser.add_argument(

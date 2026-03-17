@@ -51,6 +51,10 @@ python img2feat_decoded_copy.py --gpu 0 --subject subj01 --method mlp
 
 python identification.py --usefeat inception --subject subj01 --method cvpr
 python identification.py --usefeat inception --subject subj01 --method mlp
+
+python extract_feats.py --gpu 0 --subject subj01 --method cvpr
+python extract_feats.py --gpu 0 --subject subj01 --method mlp
+python overall_eval.py --subject subj01 --methods cvpr mlp --output_csv eval_results.csv
 ```
 
 To calculate all scores in one go:
