@@ -6,6 +6,7 @@ nsd
 logs/
 slurm_outs/
 data/
+results/
 
 # Takagi et al. Project specific
 decoded/**
