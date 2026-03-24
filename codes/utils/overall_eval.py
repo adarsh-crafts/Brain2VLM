@@ -61,13 +61,11 @@ import torch
 import torchvision.transforms as T
 import lpips
 
-# ─────────────────────────────────────────────────────────────────────────────
-# CONFIG
-# ─────────────────────────────────────────────────────────────────────────────
 
+# CONFIG
 NIMAGE = 982
 NREP   = 5
-_EVAL_SIZE = 425   # brain-diffuser resizes reconstructions to 425×425
+_EVAL_SIZE = 425 
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -77,17 +75,8 @@ def parse_args():
     parser.add_argument("--gpu",         type=int, default=0)
     return parser.parse_args()
 
-# ─────────────────────────────────────────────────────────────────────────────
-# PAIRWISE IDENTIFICATION ACCURACY  (exact copy from brain-diffuser)
-#
-# brain-diffuser/scripts/evaluate_reconstruction.py :: pairwise_corr_all
-#
-# Builds the full N×N corrcoef matrix between GT features and predicted
-# features.  For each prediction i, counts how many GT features j≠i have
-# a LOWER correlation than the matching GT_i → fraction correct.
-# Returns (mean_accuracy, p_value).
-# ─────────────────────────────────────────────────────────────────────────────
 
+# PAIRWISE IDENTIFICATION ACCURACY
 def pairwise_corr_all(ground_truth: np.ndarray,
                        predictions: np.ndarray) -> tuple:
     """
@@ -113,10 +102,8 @@ def pairwise_corr_all(ground_truth: np.ndarray,
     p    = 1 - binom.cdf(perf * n * (n - 1), n * (n - 1), 0.5)
     return float(perf), float(p)
 
-# ─────────────────────────────────────────────────────────────────────────────
-# FEATURE LOADERS  (mirrors identification script)
-# ─────────────────────────────────────────────────────────────────────────────
 
+# Feature Loaders
 def load_feat_org(imgid: int, subject: str, method: str,
                   usefeat: str) -> np.ndarray:
     featdir = f'../../identification/{method}/{subject}'
@@ -131,17 +118,15 @@ def load_feat_gen(imgid: int, subject: str, method: str,
         for rep in range(NREP)
     ]
 
-# ─────────────────────────────────────────────────────────────────────────────
-# FEATURE METRIC  (pairwise identification accuracy, brain-diffuser protocol)
-#
-# For 5 reconstructions per image: average features across reps then
-# run pairwise_corr_all.  This matches the identification script's convention
-# of using r_true.mean() vs r_fake.mean().
-# ─────────────────────────────────────────────────────────────────────────────
 
+# Feature Metrics  (pairwise identification accuracy)
 def compute_feat_metric(subject: str, method: str, usefeat: str) -> float:
     """
     Returns pairwise identification accuracy (0–1) for the given feature.
+
+    For 5 reconstructions per image: average features across reps then
+    run pairwise_corr_all.  This matches the identification script's convention of 
+    using r_true.mean() vs r_fake.mean().
     """
     gt_feats   = []
     pred_feats = []
@@ -157,11 +142,8 @@ def compute_feat_metric(subject: str, method: str, usefeat: str) -> float:
     perf, _ = pairwise_corr_all(gt_arr, pred_arr)
     return perf
 
-# ─────────────────────────────────────────────────────────────────────────────
-# RETRIEVAL @1 / @10
-# Full N×N cosine similarity, mean-pooled reconstructions vs GT.
-# ─────────────────────────────────────────────────────────────────────────────
 
+# Retrieval @1 & @10 (Full N×N cosine similarity, mean-pooled reconstructions vs GT)
 def compute_retrieval(subject: str, method: str,
                       usefeat: str = "clip") -> tuple:
     gt_feats   = []
@@ -189,10 +171,8 @@ def compute_retrieval(subject: str, method: str,
 
     return at1 / NIMAGE, at10 / NIMAGE
 
-# ─────────────────────────────────────────────────────────────────────────────
-# PIXEL-LEVEL METRICS  (aligned to brain-diffuser exactly)
-# ─────────────────────────────────────────────────────────────────────────────
 
+# Pixel-level metrics
 _lpips_tf = T.Compose([
     T.Resize((256, 256)),
     T.ToTensor(),
@@ -302,27 +282,22 @@ def compute_pixel_metrics(subject: str, method: str,
 
     return {k: float(np.mean(v)) for k, v in scores.items()}
 
-# ─────────────────────────────────────────────────────────────────────────────
-# FEATURE → TABLE METRIC MAPPING
-# Maps table metric name → saved .npy feature suffix (from extract_feats.py)
-# ─────────────────────────────────────────────────────────────────────────────
 
+# Feature Table Metric Mapping
 FEAT_METRICS = {
     # Low-level feature metrics
-    "AlexNet(5)":  "alexnet5",    # AlexNet features[11]   ← matches brain-diffuser layer-5
-    "CLIP(6)":     "clip_h6",     # CLIP ViT-L/14 block-6 CLS
-    "DINOv2(6)":   "dino_h6",     # DINOv2 ViT-B/14 block-6 CLS
+    "AlexNet(5)":  "alexnet5", 
+    "CLIP(6)":     "clip_h6",     
+    "DINOv2(6)":   "dino_h6",     
     # High-level feature metrics
-    "AlexNet":     "alexnet18",   # AlexNet classifier[5] FC (4096-d)
-    "CLIP":        "clip",        # CLIP ViT-L/14 final embed  ← matches brain-diffuser
-    "DINO":        "dino",        # DINOv2 ViT-B/14 final CLS
-    "Inception":   "inception",   # InceptionV3 avgpool        ← matches brain-diffuser
+    "AlexNet":     "alexnet18",   
+    "CLIP":        "clip",        
+    "DINO":        "dino",        
+    "Inception":   "inception",   
 }
 
-# ─────────────────────────────────────────────────────────────────────────────
-# SINGLE-METHOD EVALUATION
-# ─────────────────────────────────────────────────────────────────────────────
 
+# Single-method Eval
 def evaluate_method(method: str, subject: str,
                     lpips_model, device) -> dict:
     print(f"\n{'='*65}")
@@ -331,17 +306,17 @@ def evaluate_method(method: str, subject: str,
 
     results = {}
 
-    # ── Pixel-level ─────────────────────────────────────────────────────────
+    # Pixel-level 
     print("  [1/3] Pixel-level metrics (PixCorr, SSIM, PSNR, LPIPS) …")
     results.update(compute_pixel_metrics(subject, method, lpips_model, device))
 
-    # ── Feature-based (pairwise identification accuracy) ────────────────────
+    # Feature-based (pairwise identification accuracy) 
     print("  [2/3] Feature-based metrics (pairwise identification accuracy) …")
     for metric_name, feat_suffix in FEAT_METRICS.items():
         print(f"    {metric_name} ({feat_suffix}) …")
         results[metric_name] = compute_feat_metric(subject, method, feat_suffix)
 
-    # ── Retrieval @1 / @10 ──────────────────────────────────────────────────
+    # Retrieval @1 / @10 
     print("  [3/3] Retrieval @1 / @10 (CLIP features) …")
     at1, at10 = compute_retrieval(subject, method, usefeat="clip")
     results["@1"]  = at1
@@ -349,10 +324,8 @@ def evaluate_method(method: str, subject: str,
 
     return results
 
-# ─────────────────────────────────────────────────────────────────────────────
-# MAIN
-# ─────────────────────────────────────────────────────────────────────────────
 
+# MAIN
 def main():
     args   = parse_args()
     device = torch.device(f"cuda:{args.gpu}" if torch.cuda.is_available() else "cpu")
@@ -374,7 +347,7 @@ def main():
             print(f"\n[ERROR] method={method}: {exc}")
             traceback.print_exc()
 
-    # ── Results table ────────────────────────────────────────────────────────
+    # Results table
     metric_order = [
         "PixCorr", "SSIM", "PSNR", "LPIPS",          # Low-level pixel
         "AlexNet(5)", "CLIP(6)", "DINOv2(6)",          # Low-level feature
