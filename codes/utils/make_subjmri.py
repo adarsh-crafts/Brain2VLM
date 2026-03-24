@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 from nsd_access import NSDAccess
 import scipy.io
+import gc
 
 def main():
     parser = argparse.ArgumentParser()
@@ -25,11 +26,15 @@ def main():
     # This is why subtracting 1
     sharedix = nsd_expdesign['sharedix'] -1 
 
-    behs = pd.DataFrame()
+    atlas = nsda.read_atlas_results(subject=subject, atlas=atlasname, data_format='func1pt8mm')
+    atlas_mask = atlas[0].transpose([2,1,0])
+
+    beh_list = []
     for i in range(1,38):
         beh = nsda.read_behavior(subject=subject, 
                                 session_index=i)
-        behs = pd.concat((behs,beh))
+        beh_list.append(beh)
+    behs = pd.concat(beh_list, ignore_index=True)
 
     # Caution: 73KID is 1-based! https://cvnlab.slite.page/p/fRv4lz5V2F/Behavioral-data
     stims_unique = behs['73KID'].unique() - 1
@@ -42,26 +47,25 @@ def main():
         np.save(f'{savedir}/{subject}_stims.npy',stims_all)
         np.save(f'{savedir}/{subject}_stims_ave.npy',stims_unique)
 
-    for i in range(1,38):
-        print(i)
-        beta_trial = nsda.read_betas(subject=subject, 
-                                session_index=i, 
-                                trial_index=[], # empty list as index means get all for this session
-                                data_type='betas_fithrf_GLMdenoise_RR',
-                                data_format='func1pt8mm')
-        if i==1:
-            betas_all = beta_trial
-        else:
-            betas_all = np.concatenate((betas_all,beta_trial),0)    
-    
-    atlas = nsda.read_atlas_results(subject=subject, atlas=atlasname, data_format='func1pt8mm')
     for roi,val in atlas[1].items():
         print(roi,val)
         if val == 0:
             print('SKIP')
             continue
         else:
-            betas_roi = betas_all[:,atlas[0].transpose([2,1,0])==val]
+            betas_roi_list = []
+            for i in range(1,38):
+                print(i)
+                beta_trial = nsda.read_betas(subject=subject, 
+                                        session_index=i, 
+                                        trial_index=[], # empty list as index means get all for this session
+                                        data_type='betas_fithrf_GLMdenoise_RR',
+                                        data_format='func1pt8mm')
+                beta_roi = beta_trial[:, atlas_mask==val]
+                betas_roi_list.append(beta_roi)
+                del beta_trial
+            betas_roi = np.concatenate(betas_roi_list, axis=0)
+            del betas_roi_list
 
         print(betas_roi.shape)
         
@@ -75,34 +79,23 @@ def main():
         
         # Train/Test Split
         # ALLDATA
-        betas_tr = []
-        betas_te = []
-
-        for idx,stim in enumerate(stims_all):
-            if stim in sharedix:
-                betas_te.append(betas_roi[idx,:])
-            else:
-                betas_tr.append(betas_roi[idx,:])
-
-        betas_tr = np.stack(betas_tr)
-        betas_te = np.stack(betas_te)    
+        shared_mask = np.isin(stims_all, sharedix)
+        betas_te = betas_roi[shared_mask]
+        betas_tr = betas_roi[~shared_mask]
         
         # AVERAGED DATA        
-        betas_ave_tr = []
-        betas_ave_te = []
-        for idx,stim in enumerate(stims_unique):
-            if stim in sharedix:
-                betas_ave_te.append(betas_roi_ave[idx,:])
-            else:
-                betas_ave_tr.append(betas_roi_ave[idx,:])
-        betas_ave_tr = np.stack(betas_ave_tr)
-        betas_ave_te = np.stack(betas_ave_te)    
+        shared_mask_ave = np.isin(stims_unique, sharedix)
+        betas_ave_te = betas_roi_ave[shared_mask_ave]
+        betas_ave_tr = betas_roi_ave[~shared_mask_ave]    
         
         # Save
         np.save(f'{savedir}/{subject}_{roi}_betas_tr.npy',betas_tr)
         np.save(f'{savedir}/{subject}_{roi}_betas_te.npy',betas_te)
         np.save(f'{savedir}/{subject}_{roi}_betas_ave_tr.npy',betas_ave_tr)
         np.save(f'{savedir}/{subject}_{roi}_betas_ave_te.npy',betas_ave_te)
+
+        del betas_roi
+        gc.collect()
 
 
 if __name__ == "__main__":
