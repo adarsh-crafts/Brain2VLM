@@ -4,8 +4,6 @@
 
 # Brain2VLM: Hierarchical Alignment Between Cortical Representations and Vision-Language Latent Spaces
 
-N. A. Adarsh Pritam, Sanyam Jain, 2026
-
 [[Paper](<ADD_PAPER_LINK>)]
 
 # General Information
