@@ -6,7 +6,7 @@
 
 N. A. Adarsh Pritam, Jeba Shiney O, Sanyam Jain, 2026
 
-[[Preprint Paper](10.13140/RG.2.2.26951.05288)]
+[[Preprint Paper](https://doi.org/10.13140/RG.2.2.26951.05288)
 
 # General Information
 
