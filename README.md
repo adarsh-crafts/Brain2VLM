@@ -4,9 +4,9 @@
 
 # Brain2VLM: Hierarchical Alignment Between Cortical Representations and Vision-Language Latent Spaces
 
-N. A. Adarsh Pritam, Sanyam Jain, 2026
+N. A. Adarsh Pritam, Jeba Shiney O, Sanyam Jain, 2026
 
-[[Paper](<ADD_PAPER_LINK>)]
+[[Preprint Paper](10.13140/RG.2.2.26951.05288)]
 
 # General Information
 
@@ -101,6 +101,21 @@ python extract_feats.py --gpu 0 --subject subj01 --method cvpr
 python extract_feats.py --gpu 0 --subject subj01 --method mlp
 python overall_eval.py --subject subj01 --methods cvpr mlp --output_csv eval_results.csv
 ```
+
+---
+## Citation
+
+If you find this work useful, please cite our paper:
+```bibtex
+@misc{pritam2026brain2vlm,
+  author       = {N. A. Adarsh Pritam and Jeba Shiney O and Sanyam Jain},
+  title        = {Brain2VLM: Hierarchical Alignment Between Cortical Representations and Vision-Language Latent Spaces},
+  year         = {2026},
+  doi          = {10.13140/RG.2.2.26951.05288},
+  url          = {https://doi.org/10.13140/RG.2.2.26951.05288}
+}
+```
+---
 
 # Acknowledgement
 Our codebase builds on these repositories. We would like to thank the authors. 
