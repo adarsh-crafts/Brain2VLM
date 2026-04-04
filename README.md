@@ -49,9 +49,7 @@ The pipeline consists of:
 
 # Environment Setup
 1. Setup the env and data files.  
-(use [steps-to-setup-ec2.md](steps-to-setup-ec2.md))
 3. Install Stable Diffusion v1.4 (under the ``diffusion_sd1/`` directory), download checkpoint (``sd-v1-4.ckpt``), and place it under the ``codes/diffusion_sd1/stable-diffusion/models/ldm/stable-diffusion-v1/`` directory.  
-(use [notebook](my-code/download_weights.ipynb).)
 
 # Install Dependencies
 ```
