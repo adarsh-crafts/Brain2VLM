@@ -1,5 +1,5 @@
 [![License](https://img.shields.io/badge/License-MIT-green)](https://opensource.org/licenses/MIT)
-[![arXiv](https://img.shields.io/badge/arXiv-preprint-red)](#add-link-here)
+[![Preprint](https://img.shields.io/badge/ResearchGate-preprint-red)](https://doi.org/10.13140/RG.2.2.26951.05288)
 [![Python](https://img.shields.io/badge/Python-3.11.14-blue)](https://www.python.org/)
 
 # Brain2VLM: Hierarchical Alignment Between Cortical Representations and Vision-Language Latent Spaces
