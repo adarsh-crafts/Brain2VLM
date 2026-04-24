@@ -1,12 +1,12 @@
 [![License](https://img.shields.io/badge/License-MIT-green)](https://opensource.org/licenses/MIT)
-[![Preprint](https://img.shields.io/badge/ResearchGate-preprint-red)](https://doi.org/10.13140/RG.2.2.26951.05288)
+[![bioRxiv](https://img.shields.io/badge/bioRxiv-preprint-FF6F00?logo=biorxiv&logoColor=white)](https://doi.org/10.64898/2026.04.23.720313)
 [![Python](https://img.shields.io/badge/Python-3.11.14-blue)](https://www.python.org/)
 
 # Brain2VLM: Hierarchical Alignment Between Cortical Representations and Vision-Language Latent Spaces
 
 N. A. Adarsh Pritam, Jeba Shiney O, Sanyam Jain, 2026
 
-[[Preprint Paper](https://doi.org/10.13140/RG.2.2.26951.05288)]
+[[Preprint Paper](https://doi.org/10.64898/2026.04.23.720313)]
 
 # General Information
 
