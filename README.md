@@ -105,7 +105,7 @@ python overall_eval.py --subject subj01 --methods cvpr mlp --output_csv eval_res
 
 If you find this work useful, please cite our paper:
 ```bibtex
-@article {Pritam2026.04.23.720313,
+@article {Pritam2026Brain2VLM.04.23.720313,
 	author = {Pritam, N A Adarsh and O, Jeba Shiney and Jain, Sanyam},
 	title = {Brain2VLM: Hierarchical Alignment Between Cortical Representations and Vision-Language Latent Spaces},
 	elocation-id = {2026.04.23.720313},
